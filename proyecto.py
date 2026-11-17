@@ -1,7 +1,6 @@
 #trabajo 4 de programacion de el grupo: 213023A_2204
 
 # Reserva Sala
-
 class ReservaSala(Servicio):
     def __init__(self, codigo: str, nombre: str, tarifa_hora: float,
                  capacidad: int):
