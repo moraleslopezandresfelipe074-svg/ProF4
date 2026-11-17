@@ -1,5 +1,11 @@
 #trabajo 4 de programacion de el grupo: 213023A_2204
 
+#Cliente
+#remplacen esta linea de texto completa con el codigo
+
+#Servicio (Abstracta)
+#remplacen esta linea de texto completa con el codigo
+
 # Reserva Sala
 class ReservaSala(Servicio):
     def __init__(self, codigo: str, nombre: str, tarifa_hora: float,
@@ -50,3 +56,43 @@ class ReservaSala(Servicio):
 
     def describir(self) -> str:
         return f"Sala: {self.nombre}, capacidad {self.capacidad}
+
+#Alquiler Equipo
+#remplacen esta linea de texto completa con el codigo
+
+#Asesoria Especializada
+#remplacen esta linea de texto completa con el codigo
+
+#Reserva
+#remplacen esta linea de texto completa con el codigo
+
+#Excepciones Personalizadas
+
+class SistemaError(Exception):
+    """Excepcion base del sistema."""
+
+
+class DatosInvalidosError(SistemaError):
+    """Datos ingresados no validos."""
+
+
+class ClienteNoEncontradoError(SistemaError):
+    """El cliente solicitado no existe."""
+
+
+class ServicioNoDisponibleError(SistemaError):
+    """El servicio o los recursos no estan disponibles."""
+
+
+class ReservaInvalidaError(SistemaError):
+    """La reserva no puede realizarse."""
+
+
+class EstadoReservaError(SistemaError):
+    """La operacion no corresponde al estado de la reserva."""
+
+#Logger
+#remplacen esta linea de texto completa con el codigo
+
+#Simulaciones
+#remplacen esta linea de texto completa con el codigo
