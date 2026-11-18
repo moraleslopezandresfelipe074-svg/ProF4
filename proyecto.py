@@ -493,7 +493,7 @@ class Reserva:
             self.servicio.cantidad_disponible -= self.cantidad
 
         else:
-            self.servicio.validar_parametro()
+            self.servicio.validar_parametros()
 
         self.estado = "confirmada"
 
@@ -506,8 +506,8 @@ class Reserva:
                     "no se puede confirmar reserva"
                 )
 
-        if self.estado != "condirmada":
-            return EstadoReservaError(
+        if self.estado != "confirmada":
+            raise EstadoReservaError(
                 "La reserva no esta confirmada."
             )
 
@@ -528,56 +528,25 @@ class Reserva:
             raise ReservaInvalidaError(
                 "Tipo de servicio no reconocido."
             )
-
+        
     def cancelar(self):
         if self.estado == "cancelada":
             return False
-
-        if self.estado == " confirmada":
+        if self.estado == "confirmada":
             if isinstance(self.servicio, AlquilerEquipo):
                 self.servicio.cantidad_disponible += self.cantidad
-
+                
         self.estado = "cancelada"
         return True
 
     def mostrar_reserva(self):
 
         print("\n========== INFORMACION DE LA RESERVA ==========")
-        print("Cliente:", self.cliente)
+        print("Cliente:", self.cliente.get_nombre())
         print("Servicio:", self.servicio.describir())
         print("Duracion:", self.duracion)
         print("Estado:", self.estado)
         print("================================================")
-
-    def cancelar(self):
-        
-        if self.estado == "cancelada":
-            return False
-        
-        if self.estado == "confirmada":
-            if hasattr(self.servicio, "cantidad_disponible"):
-                self.servicio.cantidad_disponible += 1 
-                
-        self.estado = "cancelada"
-        return True
-    
-    def procesar(self):
-        if self.estado == "pendiente":
-            if not self.confirmar():
-                raise ValueError ("no se pudo confirmar la reserva.")
-            
-        if self.estado != "confirmada":
-            raise ValueError ("la reserva no esta confirmada.")
-        
-        return self.servicio.calcular_costo()
-    
-    def mostrar_reserva(self):
-        
-        print("INFORMACION DE LA RESERVA")
-        print("Cliente:", self.cliente)
-        print("servicio:", self.servicio.describir())
-        print("duracion:", self.duracion)
-        print("Estado:", self.estado)
 
 #Excepciones Personalizadas
 
@@ -693,24 +662,22 @@ if __name__ == "__main__":
 
     print("SISTEMA DE REGISTRO - SOFTWARE FJ")
 
-    logger = Logger()
+    registro = Logger()
 
     try:
-        # Registrar eventos del sistema
-        logger.registrar_evento(
+        registro.registrar_evento(
             "El sistema inicio correctamente."
         )
 
-        logger.registrar_evento(
+        registro.registrar_evento(
             "Se registro un nuevo cliente."
         )
 
-        logger.registrar_evento(
+        registro.registrar_evento(
             "Se creo una nueva reserva."
         )
 
-        # Registrar un error de prueba
-        logger.registrar_error(
+        registro.registrar_error(
             "Error de prueba: servicio no disponible."
         )
 
@@ -721,7 +688,6 @@ if __name__ == "__main__":
 
     finally:
         print("Finalizo la ejecucion del modulo Logger.")
-
 
 #Simulaciones
 def ejecutar_prueba(numero, descripcion, funcion):
