@@ -912,5 +912,6 @@ if __name__ == "__main__":
     ejecutar_prueba(10, "Calcular asesoria con descuento", prueba_10)
     ejecutar_prueba(11, "Procesar reserva de asesoria", prueba_11)
     ejecutar_prueba(12, "Registrar eventos en Logger", prueba_12)
+    ejecutar_prueba(13, "Intentar crear una salacon capacidad invalida", prueba_13)
 
     print("\nFINALIZARON LAS SIMULACIONES")
