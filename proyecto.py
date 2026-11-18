@@ -241,7 +241,150 @@ class ReservaSala(Servicio):
 #remplacen esta linea de texto completa con el codigo
 
 #Asesoria Especializada
-#remplacen esta linea de texto completa con el codigo
+
+import logging
+from servicio import Servicio
+
+
+logger = logging.getLogger("SoftwareFJ")
+
+
+class AsesoriaEspecializada(Servicio):
+    """
+    Clase encargada de gestionar los servicios
+    de asesoria especializada.
+    """
+
+    def __init__(self, nombre, especialista, tarifa_hora, duracion):
+
+        self.__nombre = nombre
+        self.__especialista = especialista
+        self.__tarifa_hora = tarifa_hora
+        self.__duracion = duracion
+
+        self.validar_parametros()
+
+        logger.info("Asesoria especializada creada correctamente.")
+
+    # METODO PARA VALIDAR LOS PARAMETROS
+
+    def validar_parametros(self):
+
+        if not isinstance(self.__nombre, str) or not self.__nombre.strip():
+            raise ValueError("El nombre de la asesoria no es valido.")
+
+        if not isinstance(self.__especialista, str) or not self.__especialista.strip():
+            raise ValueError("El nombre del especialista no es valido.")
+
+        if not isinstance(self.__tarifa_hora, (int, float)):
+            raise ValueError("La tarifa por hora debe ser numerica.")
+
+        if self.__tarifa_hora <= 0:
+            raise ValueError("La tarifa por hora debe ser mayor que cero.")
+
+        if not isinstance(self.__duracion, (int, float)):
+            raise ValueError("La duracion debe ser numerica.")
+
+        if self.__duracion <= 0:
+            raise ValueError("La duracion debe ser mayor que cero.")
+
+        return True
+
+    # METODO PARA CALCULAR EL COSTO
+
+    def calcular_costo(self, descuento=0, impuesto=0):
+
+        try:
+            self.validar_parametros()
+
+            if not isinstance(descuento, (int, float)):
+                raise ValueError("El descuento debe ser numerico.")
+
+            if not isinstance(impuesto, (int, float)):
+                raise ValueError("El impuesto debe ser numerico.")
+
+            if descuento < 0 or descuento > 100:
+                raise ValueError("El descuento debe estar entre 0 y 100.")
+
+            if impuesto < 0 or impuesto > 100:
+                raise ValueError("El impuesto debe estar entre 0 y 100.")
+
+            costo_base = self.__tarifa_hora * self.__duracion
+
+            valor_descuento = costo_base * (descuento / 100)
+
+            subtotal = costo_base - valor_descuento
+
+            valor_impuesto = subtotal * (impuesto / 100)
+
+            costo_total = subtotal + valor_impuesto
+
+            logger.info("Costo de asesoria calculado correctamente.")
+
+            return round(costo_total, 2)
+
+        except ValueError as error:
+            logger.error("Error al calcular el costo: %s", error)
+            raise
+
+        except Exception as error:
+            logger.exception("Error inesperado al calcular el costo.")
+            raise RuntimeError(
+                "No fue posible calcular el costo de la asesoria."
+            ) from error
+
+    # METODO PARA DESCRIBIR EL SERVICIO
+
+    def describir(self):
+
+        return (
+            "\n===== ASESORIA ESPECIALIZADA =====\n"
+            f"Nombre del servicio: {self.__nombre}\n"
+            f"Especialista: {self.__especialista}\n"
+            f"Tarifa por hora: ${self.__tarifa_hora:,.2f}\n"
+            f"Duracion: {self.__duracion} horas\n"
+            f"Costo total: ${self.calcular_costo():,.2f}\n"
+            "=================================="
+        )
+
+
+# PRUEBA DEL FUNCIONAMIENTO DE LA CLASE
+
+if __name__ == "__main__":
+
+    print("SISTEMA DE ASESORIAS - SOFTWARE FJ")
+
+    try:
+        asesoria = AsesoriaEspecializada(
+            "Asesoria en desarrollo de software",
+            "Especialista en sistemas",
+            50000,
+            2
+        )
+
+        print(asesoria.describir())
+
+        print("\nCosto con descuento del 10%:")
+        print("$", asesoria.calcular_costo(descuento=10))
+
+        print("\nCosto con impuesto del 19%:")
+        print("$", asesoria.calcular_costo(impuesto=19))
+
+        print("\nCosto con descuento e impuesto:")
+        print("$", asesoria.calcular_costo(
+            descuento=10,
+            impuesto=19
+        ))
+
+    except ValueError as error:
+        print("Error de validacion:", error)
+
+    except Exception as error:
+        print("Se presento un error:", error)
+
+    finally:
+        print("\nFinalizo la ejecucion del modulo de asesoria.")
+
 
 #Reserva
 #remplacen esta linea de texto completa con el codigo
