@@ -415,7 +415,123 @@ class EstadoReservaError(SistemaError):
     """La operacion no corresponde al estado de la reserva."""
 
 #Logger
-#remplacen esta linea de texto completa con el codigo
+
+import logging
+import os
+
+
+class Logger:
+    """
+    Clase encargada de configurar y gestionar
+    los registros de eventos y errores del sistema.
+    """
+
+    def __init__(self):
+        self.__logger = None
+        self.configurar_logger()
+
+    # METODO PARA CONFIGURAR EL LOGGER
+
+    def configurar_logger(self):
+
+        os.makedirs("logs", exist_ok=True)
+
+        self.__logger = logging.getLogger("SoftwareFJ")
+
+        self.__logger.setLevel(logging.INFO)
+
+        # Evitar duplicar los registros
+        if not self.__logger.handlers:
+
+            # Configurar archivo de registros
+            archivo = logging.FileHandler(
+                "logs/sistema.log",
+                encoding="utf-8"
+            )
+
+            formato = logging.Formatter(
+                "%(asctime)s - %(levelname)s - %(message)s"
+            )
+
+            archivo.setFormatter(formato)
+
+            self.__logger.addHandler(archivo)
+
+        return self.__logger
+
+    # METODO PARA REGISTRAR EVENTOS
+
+    def registrar_evento(self, mensaje):
+
+        try:
+            if not isinstance(mensaje, str) or not mensaje.strip():
+                raise ValueError("El mensaje del evento no es valido.")
+
+            self.__logger.info(mensaje)
+
+            print("Evento registrado correctamente.")
+
+        except ValueError as error:
+            self.registrar_error(str(error))
+            raise
+
+        except Exception as error:
+            self.registrar_error(
+                "Error inesperado al registrar evento: " + str(error)
+            )
+            raise
+
+    # METODO PARA REGISTRAR ERRORES
+
+    def registrar_error(self, mensaje):
+
+        try:
+            if not isinstance(mensaje, str) or not mensaje.strip():
+                raise ValueError("El mensaje del error no es valido.")
+
+            self.__logger.error(mensaje)
+
+            print("Error registrado en el archivo de logs.")
+
+        except Exception as error:
+            print("No fue posible registrar el error:", error)
+
+
+# PRUEBA DEL FUNCIONAMIENTO DE LA CLASE
+
+if __name__ == "__main__":
+
+    print("SISTEMA DE REGISTRO - SOFTWARE FJ")
+
+    logger = Logger()
+
+    try:
+        # Registrar eventos del sistema
+        logger.registrar_evento(
+            "El sistema inicio correctamente."
+        )
+
+        logger.registrar_evento(
+            "Se registro un nuevo cliente."
+        )
+
+        logger.registrar_evento(
+            "Se creo una nueva reserva."
+        )
+
+        # Registrar un error de prueba
+        logger.registrar_error(
+            "Error de prueba: servicio no disponible."
+        )
+
+        print("\nRegistros realizados correctamente.")
+
+    except Exception as error:
+        print("Se presento un problema:", error)
+
+    finally:
+        print("Finalizo la ejecucion del modulo Logger.")
+
 
 #Simulaciones
 #remplacen esta linea de texto completa con el codigo
