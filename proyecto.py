@@ -1,5 +1,5 @@
 #trabajo 4 de programacion de el grupo: 213023A_2204
-
+#Por: Karen, Karol y Andres
 #Cliente
 
 import re
