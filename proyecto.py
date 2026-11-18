@@ -881,6 +881,17 @@ def prueba_12():
         "Error de prueba del sistema."
     )
 
+# PRUEBA 13: Intentar crear una sala con capacidad invalida
+def prueba_13():
+    try:
+        sala_invalida = ReservaSala(
+            "SAL002",
+            "Sala de capacidad invalida",
+            50000,
+            0
+        )
+    except DatosInvalidosError as error:
+        print("Validacion correcta:", error)
 
 # EJECUCION DE LAS SIMULACIONES
 
