@@ -184,7 +184,26 @@ if __name__ == "__main__":
 
 
 #Servicio (Abstracta)
-#remplacen esta linea de texto completa con el codigo
+from abc import ABC, abstractmethod
+
+class Servicio(ABC):
+    
+    def __init__(self, codigo: str, nombre: str, tarifa_hora: float):
+        self.codigo = codigo
+        self.nombre = nombre
+        self.tarifa_hora = tarifa_hora
+    
+    @abstractmethod
+    def calcular_costo(self):
+        pass
+    
+    @abstractmethod
+    def describir(self):
+        pass
+    
+    @abstractmethod
+    def validar_parametros(self):
+        pass  
 
 # Reserva Sala
 class ReservaSala(Servicio):
@@ -238,7 +257,40 @@ class ReservaSala(Servicio):
         return f"Sala: {self.nombre}, capacidad {self.capacidad}
 
 #Alquiler Equipo
-#remplacen esta linea de texto completa con el codigo
+class AlquilerEquipo(Servicio):
+    
+     def __init__(self, codigo: str, nombre: str, tarifa_hora: float,
+                 cantidad_disponible: int, horas_alquiler: int):
+
+        super().__init__(codigo, nombre, tarifa_hora)
+        self.cantidad_disponible = cantidad_disponible
+        self.horas_alquiler = horas_alquiler
+        
+        
+     def calcular_costo(self):
+        return self.tarifa_hora * self.horas_alquiler
+
+     def describir(self):
+         return (f"Equipo: {self.nombre},"
+                 f"Tarifa por hora: ${self.tarifa_hora},"
+                 f"Disponibles: {self.cantidad_disponible}")
+    
+
+     def validar_parametros(self):
+         
+        if not self.codigo or not self.nombre:
+            return False
+        
+        if self.tarifa_hora <= 0:
+            return False
+        
+        if self.cantidad_disponible < 0:
+            return False
+        
+        if self.horas_alquiler <= 0:
+            return False
+        
+        return True
 
 #Asesoria Especializada
 
@@ -387,7 +439,61 @@ if __name__ == "__main__":
 
 
 #Reserva
-#remplacen esta linea de texto completa con el codigo
+
+class Reserva:
+    
+    def __init__(self, cliente, servicio, duracion):
+        self.cliente = cliente
+        self.servicio = servicio
+        self.duracion = duracion
+        self.estado = "pendiente"
+        
+    def confirmar(self):
+        
+        if self.estado != "pendiente":
+            return False
+        
+        if not self.servicio.validar_parametros():
+            return False
+        
+        if hasattr(self.servicio, "cantidad_disponible"):
+            if self.servicio.cantidad_disponible <= 0:
+                return False
+            
+            self.servicio.cantidad_disponible -= 1
+            
+        self.estado = "confirmada"
+        return True
+    
+    def cancelar(self):
+        
+        if self.estado == "cancelada":
+            return False
+        
+        if self.estado == "confirmada":
+            if hasattr(self.servicio, "cantidad_disponible"):
+                self.servicio.cantidad_disponible += 1 
+                
+        self.estado = "cancelada"
+        return True
+    
+    def procesar(self):
+        if self.estado == "pendiente":
+            if not self.confirmar():
+                raise ValueError ("no se pudo confirmar la reserva.")
+            
+        if self.estado != "confirmada":
+            raise ValueError ("la reserva no esta confirmada.")
+        
+        return self.servicio.calcular_costo()
+    
+    def mostrar_reserva(self):
+        
+        print("INFORMACION DE LA RESERVA")
+        print("Cliente:", self.cliente)
+        print("servicio:", self.servicio.describir())
+        print("duracion:", self.duracion)
+        print("Estado:", self.estado)
 
 #Excepciones Personalizadas
 
