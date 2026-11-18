@@ -247,7 +247,7 @@ class ReservaSala(Servicio):
 #Alquiler Equipo
 class AlquilerEquipo(Servicio):
     
-     def __init__(self, codigo: str, nombre: str, tarifa_hora: float,
+    def __init__(self, codigo: str, nombre: str, tarifa_hora: float,
                  cantidad_disponible: int, horas_alquiler: int):
 
         super().__init__(codigo, nombre, tarifa_hora)
@@ -468,7 +468,7 @@ if __name__ == "__main__":
 
 class Reserva:
     
-    def __init__(self, cliente, servicio, duracion):
+    def __init__(self, cliente, servicio, duracion, personas=1, cantidad=1):
         self.cliente = cliente
         self.servicio = servicio
         self.duracion = duracion
@@ -537,7 +537,7 @@ class Reserva:
             if isinstance(self.servicio, AlquilerEquipo):
                 self.servicio.cantidad_disponible += self.cantidad
 
-        self.estado = "cancelada":
+        self.estado = "cancelada"
         return True
 
     def mostrar_reserva(self):
@@ -724,4 +724,216 @@ if __name__ == "__main__":
 
 
 #Simulaciones
-#remplacen esta linea de texto completa con el codigo
+def ejecutar_prueba(numero, descripcion, funcion):
+
+    print("\n" + "=" * 50)
+    print("PRUEBA", numero, ":", descripcion)
+    print("=" * 50)
+
+    try:
+        funcion()
+        print("Resultado: prueba ejecutada correctamente.")
+
+    except Exception as error:
+        print("Error controlado:", type(error).__name__, "-", error)
+
+
+# PRUEBA 1: Registrar cliente valido
+
+def prueba_1():
+
+    global cliente_prueba
+
+    cliente_prueba = Cliente(
+        "Andres Felipe",
+        "1234567890",
+        "andres@gmail.com"
+    )
+
+    cliente_prueba.mostrar_datos()
+
+
+# PRUEBA 2: Registrar cliente con correo invalido
+
+def prueba_2():
+
+    try:
+        Cliente("Carlos Perez", "9876543210", "correo_invalido")
+    except ErrorCliente as error:
+        print("Validacion correcta:", error)
+
+
+# PRUEBA 3: Crear una sala
+
+def prueba_3():
+
+    global sala_prueba
+
+    sala_prueba = ReservaSala(
+        "SAL001",
+        "Sala de reuniones",
+        50000,
+        10
+    )
+
+    print(sala_prueba.describir())
+
+
+# PRUEBA 4: Procesar una reserva de sala
+
+def prueba_4():
+
+    reserva = Reserva(
+        cliente_prueba,
+        sala_prueba,
+        2,
+        personas=5
+    )
+
+    reserva.confirmar()
+    reserva.mostrar_reserva()
+
+    print("Costo total: $", reserva.procesar())
+
+
+# PRUEBA 5: Superar la capacidad de una sala
+
+def prueba_5():
+
+    try:
+        reserva = Reserva(
+            cliente_prueba,
+            sala_prueba,
+            2,
+            personas=15
+        )
+
+        reserva.confirmar()
+
+    except DatosInvalidosError as error:
+        print("Validacion correcta:", error)
+
+
+# PRUEBA 6: Crear equipo para alquiler
+
+def prueba_6():
+
+    global equipo_prueba
+
+    equipo_prueba = AlquilerEquipo(
+        "EQ001",
+        "Video Beam",
+        20000,
+        5,
+        3
+    )
+
+    print(equipo_prueba.describir())
+
+
+# PRUEBA 7: Reservar dos equipos
+
+def prueba_7():
+
+    global reserva_equipo
+
+    reserva_equipo = Reserva(
+        cliente_prueba,
+        equipo_prueba,
+        3,
+        cantidad=2
+    )
+
+    reserva_equipo.confirmar()
+
+    print("Equipos disponibles:", equipo_prueba.cantidad_disponible)
+    print("Costo total: $", reserva_equipo.procesar())
+
+
+# PRUEBA 8: Cancelar alquiler de equipos
+
+def prueba_8():
+
+    reserva_equipo.cancelar()
+
+    print("Estado:", reserva_equipo.estado)
+    print("Equipos disponibles:", equipo_prueba.cantidad_disponible)
+
+
+# PRUEBA 9: Crear asesoria especializada
+
+def prueba_9():
+
+    global asesoria_prueba
+
+    asesoria_prueba = AsesoriaEspecializada(
+        "Asesoria en desarrollo de software",
+        "Especialista en sistemas",
+        50000,
+        2
+    )
+
+    print(asesoria_prueba.describir())
+
+
+# PRUEBA 10: Calcular asesoria con descuento
+
+def prueba_10():
+
+    costo = asesoria_prueba.calcular_costo(descuento=10)
+
+    print("Costo con descuento: $", costo)
+
+
+# PRUEBA 11: Procesar reserva de asesoria
+
+def prueba_11():
+
+    reserva = Reserva(
+        cliente_prueba,
+        asesoria_prueba,
+        2
+    )
+
+    reserva.confirmar()
+    reserva.mostrar_reserva()
+
+    print("Costo total: $", reserva.procesar())
+
+
+# PRUEBA 12: Registrar eventos en Logger
+
+def prueba_12():
+
+    registro = Logger()
+
+    registro.registrar_evento(
+        "Simulacion finalizada correctamente."
+    )
+
+    registro.registrar_error(
+        "Error de prueba del sistema."
+    )
+
+
+# EJECUCION DE LAS SIMULACIONES
+
+if __name__ == "__main__":
+
+    print("\nSISTEMA INTEGRAL SOFTWARE FJ")
+    print("EJECUCION DE SIMULACIONES")
+
+    ejecutar_prueba(1, "Registrar cliente valido", prueba_1)
+    ejecutar_prueba(2, "Validar correo invalido", prueba_2)
+    ejecutar_prueba(3, "Crear sala de reuniones", prueba_3)
+    ejecutar_prueba(4, "Procesar reserva de sala", prueba_4)
+    ejecutar_prueba(5, "Validar capacidad de sala", prueba_5)
+    ejecutar_prueba(6, "Crear equipo para alquiler", prueba_6)
+    ejecutar_prueba(7, "Reservar dos equipos", prueba_7)
+    ejecutar_prueba(8, "Cancelar alquiler de equipos", prueba_8)
+    ejecutar_prueba(9, "Crear asesoria especializada", prueba_9)
+    ejecutar_prueba(10, "Calcular asesoria con descuento", prueba_10)
+    ejecutar_prueba(11, "Procesar reserva de asesoria", prueba_11)
+    ejecutar_prueba(12, "Registrar eventos en Logger", prueba_12)
+
+    print("\nFINALIZARON LAS SIMULACIONES")
