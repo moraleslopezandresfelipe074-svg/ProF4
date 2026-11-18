@@ -191,7 +191,19 @@ class Servicio(ABC):
     def __init__(self, codigo: str, nombre: str, tarifa_hora: float):
         self.codigo = codigo
         self.nombre = nombre
-        self.tarifa_hora = tarifa_hora
+        self._tarifa_hora = tarifa_hora
+
+    def _aplicar_ajustes(self, costo, impuesto=0, descuento=0):
+        if not 0 <= descuento <= 100:
+            raise DatosInvalidosError("El descuento debe estar entre 0 y 100.")
+
+        if impuesto < 0:
+            raise DatosInvalidosError("El impuesto no puede ser negativo.")
+
+        costo -= costo * (descuento / 100)
+        costo += costo * (impuesto / 100)
+
+        return round(costo, 2)
     
     @abstractmethod
     def calcular_costo(self):
@@ -224,37 +236,13 @@ class ReservaSala(Servicio):
     def calcular_costo(self, duracion: float, *args,
                        impuesto: float = 0, descuento: float = 0,
                        **kwargs) -> float:
-        if not isinstance(duracion, (int, float)) or duracion <= 0:
+        if not isinstance(duracion, (int, float)) or isinstance(duracion,bool) or duracion <= 0:
             raise DatosInvalidosError("La duracion debe ser positiva.")
         costo = self._tarifa_hora * duracion
         return self._aplicar_ajustes(costo, impuesto, descuento)
 
     def describir(self) -> str:
-        return f"Sala: {self.nombre}, capacidad {self.capacidad}class ReservaSala(Servicio):
-    def __init__(self, codigo: str, nombre: str, tarifa_hora: float,
-                 capacidad: int):
-        super().__init__(codigo, nombre, tarifa_hora)
-        if not isinstance(capacidad, int) or isinstance(capacidad, bool) or capacidad <= 0:
-            raise DatosInvalidosError("La capacidad debe ser un entero positivo.")
-        self.capacidad = capacidad
-
-    def validar_parametros(self, **kwargs) -> None:
-        personas = kwargs.get("personas")
-        if not isinstance(personas, int) or isinstance(personas, bool) or personas <= 0:
-            raise DatosInvalidosError("Debe indicar una cantidad valida de personas.")
-        if personas > self.capacidad:
-            raise DatosInvalidosError("La cantidad de personas supera la capacidad.")
-
-    def calcular_costo(self, duracion: float, *args,
-                       impuesto: float = 0, descuento: float = 0,
-                       **kwargs) -> float:
-        if not isinstance(duracion, (int, float)) or duracion <= 0:
-            raise DatosInvalidosError("La duracion debe ser positiva.")
-        costo = self._tarifa_hora * duracion
-        return self._aplicar_ajustes(costo, impuesto, descuento)
-
-    def describir(self) -> str:
-        return f"Sala: {self.nombre}, capacidad {self.capacidad}
+        return f"Sala: {self.nombre}, capacidad:{self.capacidad} personas"
 
 #Alquiler Equipo
 class AlquilerEquipo(Servicio):
@@ -265,37 +253,73 @@ class AlquilerEquipo(Servicio):
         super().__init__(codigo, nombre, tarifa_hora)
         self.cantidad_disponible = cantidad_disponible
         self.horas_alquiler = horas_alquiler
-        
-        
-     def calcular_costo(self):
-        return self.tarifa_hora * self.horas_alquiler
 
-     def describir(self):
-         return (f"Equipo: {self.nombre},"
-                 f"Tarifa por hora: ${self.tarifa_hora},"
-                 f"Disponibles: {self.cantidad_disponible}")
-    
+        if not self.validar_parametros():
+            raise DatosInvalidosError(
+                "Los datos del equipo no son validos "
+            )
+    def calcular_costo(self, cantidad=1, impuesto=0, descuento=0):
+        if not isinstance(cantidad, int) or isinstance(cantidad, bool) or cantidad<= 0:
+            raise DatosInvalidosError(
+                "La cantidad de equipos debe ser positiva"
+            )
 
-     def validar_parametros(self):
-         
+        costo = (
+            self._tarifa_hora
+            * self.horas_alquiler
+            * cantidad
+        )
+
+        return self._aplicar_ajustes(
+            costo, impuesto, descuento
+        )
+
+    def describir(self):
+
+        return (
+            f"Equipo: {self.nombre}, "
+            f"tarifa por hora: ${self._tarifa_hora}, "
+            f"horas de alquiler: {self.horas_alquiler}, "
+            f"disponibles: {self.cantidad_disponible}"
+        )
+
+    def validar_parametros(self, cantidad=1):
+
         if not self.codigo or not self.nombre:
-            return False
-        
-        if self.tarifa_hora <= 0:
-            return False
-        
-        if self.cantidad_disponible < 0:
-            return False
-        
-        if self.horas_alquiler <= 0:
-            return False
-        
+            raise DatosInvalidosError(
+                "El codigo y el nombre son obligatorios."
+            )
+
+        if not isinstance(self._tarifa_hora, (int, float)) or self._tarifa_hora <= 0:
+            raise DatosInvalidosError(
+                "La tarifa debe ser positiva."
+            )
+
+        if not isinstance(self.cantidad_disponible, int) or isinstance(self.cantidad_disponible, bool) or self.cantidad_disponible < 0:
+            raise DatosInvalidosError(
+                "La cantidad disponible no es valida."
+            )
+
+        if not isinstance(self.horas_alquiler, int) or isinstance(self.horas_alquiler, bool) or self.horas_alquiler <= 0:
+            raise DatosInvalidosError(
+                "Las horas de alquiler deben ser positivas."
+            )
+
+        if not isinstance(cantidad, int) or isinstance(cantidad, bool) or cantidad <= 0:
+            raise DatosInvalidosError(
+                "La cantidad de equipos debe ser positiva."
+            )
+
+        if cantidad > self.cantidad_disponible:
+            raise ServicioNoDisponibleError(
+                "No hay suficientes equipos disponibles."
+            )
+
         return True
 
 #Asesoria Especializada
 
 import logging
-from servicio import Servicio
 
 
 logger = logging.getLogger("SoftwareFJ")
@@ -308,6 +332,8 @@ class AsesoriaEspecializada(Servicio):
     """
 
     def __init__(self, nombre, especialista, tarifa_hora, duracion):
+
+        super().__init__("ASE001", nombre, tarifa_hora)
 
         self.__nombre = nombre
         self.__especialista = especialista
@@ -446,25 +472,83 @@ class Reserva:
         self.cliente = cliente
         self.servicio = servicio
         self.duracion = duracion
+        self.personas = personas
+        self.cantidad = cantidad
         self.estado = "pendiente"
         
     def confirmar(self):
         
         if self.estado != "pendiente":
             return False
-        
-        if not self.servicio.validar_parametros():
-            return False
-        
-        if hasattr(self.servicio, "cantidad_disponible"):
-            if self.servicio.cantidad_disponible <= 0:
-                return False
-            
-            self.servicio.cantidad_disponible -= 1
-            
+        if isinstance(self.servicio, ReservaSala):
+            self.servicio.validar_parametros(
+                personas=self.personas
+            )
+
+        elif isinstance(self.servicio, AlquilerEquipo):
+            self.servicio.validar_parametros(
+                cantidad=self.cantidad
+            )
+
+            self.servicio.cantidad_disponible -= self.cantidad
+
+        else:
+            self.servicio.validar_parametro()
+
         self.estado = "confirmada"
+
         return True
-    
+
+    def procesar(self):
+        if self.estado == "pendiente":
+            if not self.confirmar():
+                raise ReservaInvalidaError(
+                    "no se puede confirmar reserva"
+                )
+
+        if self.estado != "condirmada":
+            return EstadoReservaError(
+                "La reserva no esta confirmada."
+            )
+
+        elif isinstance(self.servicio, ReservaSala):
+            return self.servicio.calcular_costo(
+                self.duracion
+            )
+
+        elif isinstance(self.servicio, AlquilerEquipo):
+            return self.servicio.calcular_costo(
+                cantidad=self.cantidad
+            )
+
+        elif isinstance(self.servicio, AsesoriaEspecializada):
+            return self.servicio.calcular_costo()
+
+        else:
+            raise ReservaInvalidaError(
+                "Tipo de servicio no reconocido."
+            )
+
+    def cancelar(self):
+        if self.estado == "cancelada":
+            return False
+
+        if self.estado == " confirmada":
+            if isinstance(self.servicio, AlquilerEquipo):
+                self.servicio.cantidad_disponible += self.cantidad
+
+        self.estado = "cancelada":
+        return True
+
+    def mostrar_reserva(self):
+
+        print("\n========== INFORMACION DE LA RESERVA ==========")
+        print("Cliente:", self.cliente)
+        print("Servicio:", self.servicio.describir())
+        print("Duracion:", self.duracion)
+        print("Estado:", self.estado)
+        print("================================================")
+
     def cancelar(self):
         
         if self.estado == "cancelada":
