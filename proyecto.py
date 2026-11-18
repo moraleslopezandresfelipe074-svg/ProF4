@@ -1,7 +1,187 @@
 #trabajo 4 de programacion de el grupo: 213023A_2204
 
 #Cliente
-#remplacen esta linea de texto completa con el codigo
+
+import re
+import logging
+import os
+import unicodedata
+
+
+os.makedirs("logs", exist_ok=True)
+
+logger = logging.getLogger("SoftwareFJ")
+
+if not logger.handlers:
+    logger.setLevel(logging.INFO)
+
+    archivo_log = logging.FileHandler(
+        "logs/sistema.log",
+        encoding="utf-8"
+    )
+
+    formato = logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(message)s"
+    )
+
+    archivo_log.setFormatter(formato)
+    logger.addHandler(archivo_log)
+
+
+class ErrorCliente(Exception):
+    """Excepcion para errores relacionados con los clientes."""
+    pass
+
+
+class Cliente:
+
+    def __init__(self, nombre, documento, correo):
+
+        self.__nombre = None
+        self.__documento = None
+        self.__correo = None
+
+        self.set_nombre(nombre)
+        self.set_documento(documento)
+        self.set_correo(correo)
+
+        logger.info(
+            "Cliente registrado correctamente: documento %s",
+            self.__documento
+        )
+
+    # METODOS GET Y SET DEL NOMBRE
+
+    def get_nombre(self):
+        return self.__nombre
+
+    def set_nombre(self, nombre):
+        if self.validar_nombre(nombre):
+            self.__nombre = nombre.strip()
+            logger.info("Nombre del cliente actualizado.")
+        else:
+            logger.warning("Intento de registrar un nombre invalido.")
+            raise ErrorCliente(
+                "El nombre debe contener unicamente letras y espacios."
+            )
+
+    # METODOS GET Y SET DEL DOCUMENTO
+
+    def get_documento(self):
+        return self.__documento
+
+    def set_documento(self, documento):
+        if self.validar_documento(documento):
+            self.__documento = str(documento).strip()
+            logger.info("Documento del cliente actualizado.")
+        else:
+            logger.warning("Intento de registrar un documento invalido.")
+            raise ErrorCliente(
+                "El documento debe contener entre 5 y 15 numeros."
+            )
+
+    # METODOS GET Y SET DEL CORREO
+
+    def get_correo(self):
+        return self.__correo
+
+    def set_correo(self, correo):
+        if self.validar_correo(correo):
+            self.__correo = correo.strip()
+            logger.info("Correo del cliente actualizado.")
+        else:
+            logger.warning("Intento de registrar un correo invalido.")
+            raise ErrorCliente(
+                "El correo electronico no tiene un formato valido."
+            )
+
+    # METODOS DE VALIDACION
+
+    def validar_nombre(self, nombre):
+
+        if not isinstance(nombre, str) or not nombre.strip():
+            return False
+
+        normalizado = unicodedata.normalize("NFD", nombre)
+        normalizado = "".join(
+            letra for letra in normalizado
+            if unicodedata.category(letra) != "Mn"
+        )
+
+        patron = r"^[A-Za-z\s]+$"
+
+        return bool(re.fullmatch(patron, normalizado.strip()))
+
+    def validar_documento(self, documento):
+
+        if not str(documento).strip().isdigit():
+            return False
+
+        return 5 <= len(str(documento).strip()) <= 15
+
+    def validar_correo(self, correo):
+
+        if not isinstance(correo, str):
+            return False
+
+        patron = r"^[\w.+-]+@[\w-]+\.[A-Za-z]{2,}$"
+
+        return bool(re.fullmatch(patron, correo.strip()))
+
+    # MOSTRAR INFORMACION DEL CLIENTE
+
+    def mostrar_datos(self):
+
+        print("\n========== DATOS DEL CLIENTE ==========")
+        print(f"Nombre: {self.get_nombre()}")
+        print(f"Documento: {self.get_documento()}")
+        print(f"Correo: {self.get_correo()}")
+        print("=======================================\n")
+
+
+# PRUEBA DEL FUNCIONAMIENTO DE LA CLASE
+
+if __name__ == "__main__":
+
+    print("SISTEMA DE GESTION DE CLIENTES - SOFTWARE FJ")
+
+    try:
+        cliente1 = Cliente(
+            "Karen Tatiana Morantes",
+            "1234567890",
+            "cliente@gmail.com"
+        )
+
+        print("\nCliente registrado exitosamente.")
+
+        cliente1.mostrar_datos()
+
+        # Consultar informacion mediante los metodos get
+
+        print("Consultando informacion:")
+        print("Nombre:", cliente1.get_nombre())
+        print("Documento:", cliente1.get_documento())
+        print("Correo:", cliente1.get_correo())
+
+        # Modificar informacion mediante los metodos set
+
+        cliente1.set_nombre("Karen Tatiana Morantes Bolivar")
+        cliente1.set_correo("karen@gmail.com")
+
+        print("\nDatos actualizados:")
+        cliente1.mostrar_datos()
+
+    except ErrorCliente as error:
+        print("Error al gestionar el cliente:", error)
+        logger.error("Error de cliente: %s", error)
+
+    except Exception as error:
+        print("Se presento un error inesperado:", error)
+        logger.exception("Error inesperado durante la prueba.")
+
+    finally:
+        print("Finalizo la ejecucion del modulo de clientes.")
+
 
 #Servicio (Abstracta)
 #remplacen esta linea de texto completa con el codigo
